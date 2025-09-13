@@ -754,8 +754,8 @@ SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
             Library:UpdateDisplay()
         elseif Library.CurrentTab then
             WelcomeContent.Visible = Library.CurrentTab.IsWelcome
-            ScriptGrid.Visible = not self.CurrentTab.IsWelcome
-            if not self.CurrentTab.IsWelcome then Library:UpdateDisplay() end
+            ScriptGrid.Visible = not Library.CurrentTab.IsWelcome
+            if not Library.CurrentTab.IsWelcome then Library:UpdateDisplay() end
         end
     end
 end)
@@ -813,4 +813,8 @@ end
 
 print("Script initialization complete")
 
+-- CRITICAL: Set global variable and return Library for loadstring compatibility
+_G.Library = Library
+
+-- Return the Library object - THIS IS THE KEY LINE THAT WAS MISSING!
 return Library
