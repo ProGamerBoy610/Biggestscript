@@ -812,3 +812,5 @@ for _, s in ipairs(scripts) do
 end
 
 print("Script initialization complete")
+
+return windows
