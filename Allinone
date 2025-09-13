@@ -100,7 +100,7 @@ Instance.new("UICorner", DotGlow).CornerRadius = UDim.new(0.5, 0)
 
 local MainLabel = Instance.new("TextLabel", ToggleFrame)
 MainLabel.BackgroundTransparency = 1
-MainLabel.Position = UDim2.new(0, 28, 0, 5)
+MainLabel.Position = UDim2.new(0, 28, 0.5, -7.5)
 MainLabel.Size = UDim2.new(1, -35, 0, 15)
 MainLabel.Font = Enum.Font.GothamMedium
 MainLabel.Text = "Tap To Open"
@@ -108,26 +108,6 @@ MainLabel.TextColor3 = Config.Colors.Text
 MainLabel.TextSize = 12
 MainLabel.TextXAlignment = Enum.TextXAlignment.Left
 MainLabel.ZIndex = 6
-
-local StatusLabel = Instance.new("TextLabel", ToggleFrame)
-StatusLabel.BackgroundTransparency = 1
-StatusLabel.Position = UDim2.new(0, 28, 0, 20)
-StatusLabel.Size = UDim2.new(1, -35, 0, 12)
-StatusLabel.Font = Enum.Font.Gotham
-StatusLabel.TextColor3 = Config.Colors.TextDim
-StatusLabel.TextSize = 9
-StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
-StatusLabel.ZIndex = 6
-
-local PowerIcon = Instance.new("TextLabel", ToggleFrame)
-PowerIcon.BackgroundTransparency = 1
-PowerIcon.Position = UDim2.new(1, -25, 0.5, -8)
-PowerIcon.Size = UDim2.new(0, 16, 0, 16)
-PowerIcon.Font = Enum.Font.GothamBold
-PowerIcon.Text = "●"
-PowerIcon.TextColor3 = Config.Colors.TextDim
-PowerIcon.TextSize = 12
-PowerIcon.ZIndex = 6
 
 local ToggleButton = Instance.new("TextButton", ToggleFrame)
 ToggleButton.BackgroundTransparency = 1
@@ -456,7 +436,6 @@ ToggleButton.MouseEnter:Connect(function()
     if not dragging then
         CreateTween(ToggleFrame, { BackgroundTransparency = 0.05 }):Play()
         CreateTween(Stroke, { Transparency = 0.6 }):Play()
-        CreateTween(PowerIcon, { TextColor3 = Config.Colors.Accent }):Play()
         CreateTween(ShadowFrame, { BackgroundTransparency = 0.4 }):Play()
     end
 end)
@@ -465,7 +444,6 @@ ToggleButton.MouseLeave:Connect(function()
     if not dragging then
         CreateTween(ToggleFrame, { BackgroundTransparency = 0.1 }):Play()
         CreateTween(Stroke, { Transparency = 0.8 }):Play()
-        CreateTween(PowerIcon, { TextColor3 = Config.Colors.TextDim }):Play()
         CreateTween(ShadowFrame, { BackgroundTransparency = 0.6 }):Play()
     end
 end)
@@ -776,8 +754,8 @@ SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
             Library:UpdateDisplay()
         elseif Library.CurrentTab then
             WelcomeContent.Visible = Library.CurrentTab.IsWelcome
-            ScriptGrid.Visible = not Library.CurrentTab.IsWelcome
-            if not Library.CurrentTab.IsWelcome then Library:UpdateDisplay() end
+            ScriptGrid.Visible = not self.CurrentTab.IsWelcome
+            if not self.CurrentTab.IsWelcome then Library:UpdateDisplay() end
         end
     end
 end)
