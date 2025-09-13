@@ -1,0 +1,1079 @@
+-- Full code Make it into short code
+-- Hop this will the final edit of this
+-- i don't think soooo
+
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
+
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Remove existing GUI
+if PlayerGui:FindFirstChild("ModernScriptHub") then
+    PlayerGui:FindFirstChild("ModernScriptHub"):Destroy()
+end
+
+-- Configuration
+local Config = {
+    Colors = {
+        Background = Color3.fromRGB(20, 25, 35),
+        Surface = Color3.fromRGB(30, 35, 45),
+        Primary = Color3.fromRGB(100, 120, 255),
+        Secondary = Color3.fromRGB(255, 100, 120),
+        Success = Color3.fromRGB(80, 200, 120),
+        Danger = Color3.fromRGB(255, 80, 80),
+        Text = Color3.fromRGB(240, 245, 255),
+        TextDim = Color3.fromRGB(160, 170, 190),
+        Border = Color3.fromRGB(60, 70, 85)
+    }
+}
+
+-- Main GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ModernScriptHub"
+ScreenGui.Parent = PlayerGui
+ScreenGui.ResetOnSpawn = false
+
+-- Create Library
+local Library = {}
+Library.Tabs = {}
+Library.CurrentTab = nil
+Library.AllItems = {}
+Library.Visible = true
+Library.IsLarge = false
+Library.DetailView = false
+Library.CurrentScript = nil
+
+-- Main Container
+local MainContainer = Instance.new("Frame")
+MainContainer.Name = "MainContainer"
+MainContainer.Parent = ScreenGui
+MainContainer.BackgroundColor3 = Config.Colors.Background
+MainContainer.Size = UDim2.new(0, 420, 0, 320)
+MainContainer.Position = UDim2.new(0.5, -210, 0.5, -160)
+MainContainer.BorderSizePixel = 0
+MainContainer.Active = true
+MainContainer.Draggable = true
+
+-- Corner rounding
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.Parent = MainContainer
+
+-- Header
+local HeaderFrame = Instance.new("Frame")
+HeaderFrame.Parent = MainContainer
+HeaderFrame.BackgroundColor3 = Config.Colors.Surface
+HeaderFrame.Size = UDim2.new(1, 0, 0, 45)
+HeaderFrame.BorderSizePixel = 0
+
+local HeaderCorner = Instance.new("UICorner")
+HeaderCorner.CornerRadius = UDim.new(0, 12)
+HeaderCorner.Parent = HeaderFrame
+
+local HeaderBottom = Instance.new("Frame")
+HeaderBottom.Parent = HeaderFrame
+HeaderBottom.BackgroundColor3 = Config.Colors.Surface
+HeaderBottom.Size = UDim2.new(1, 0, 0, 12)
+HeaderBottom.Position = UDim2.new(0, 0, 1, -12)
+HeaderBottom.BorderSizePixel = 0
+
+-- Title
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Parent = HeaderFrame
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Size = UDim2.new(0.5, 0, 1, 0)
+TitleLabel.Position = UDim2.new(0, 15, 0, 0)
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.Text = "SCRIPT HUB"
+TitleLabel.TextColor3 = Config.Colors.Text
+TitleLabel.TextSize = 14
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Back Button (initially hidden)
+local BackBtn = Instance.new("TextButton")
+BackBtn.Parent = HeaderFrame
+BackBtn.BackgroundColor3 = Config.Colors.Primary
+BackBtn.Size = UDim2.new(0, 30, 0, 25)
+BackBtn.Position = UDim2.new(0, 10, 0.5, -12.5)
+BackBtn.Font = Enum.Font.GothamBold
+BackBtn.Text = "<"
+BackBtn.TextColor3 = Config.Colors.Text
+BackBtn.TextSize = 16
+BackBtn.BorderSizePixel = 0
+BackBtn.Visible = false
+
+local BackCorner = Instance.new("UICorner")
+BackCorner.CornerRadius = UDim.new(0, 6)
+BackCorner.Parent = BackBtn
+
+-- Control Buttons Container
+local ControlsContainer = Instance.new("Frame")
+ControlsContainer.Parent = HeaderFrame
+ControlsContainer.BackgroundTransparency = 1
+ControlsContainer.Size = UDim2.new(0, 90, 0, 25)
+ControlsContainer.Position = UDim2.new(1, -100, 0.5, -12.5)
+
+local ControlsLayout = Instance.new("UIListLayout")
+ControlsLayout.Parent = ControlsContainer
+ControlsLayout.FillDirection = Enum.FillDirection.Horizontal
+ControlsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ControlsLayout.Padding = UDim.new(0, 5)
+
+-- Minimize Button
+local MinimizeBtn = Instance.new("TextButton")
+MinimizeBtn.Parent = ControlsContainer
+MinimizeBtn.BackgroundColor3 = Config.Colors.Secondary
+MinimizeBtn.Size = UDim2.new(0, 25, 0, 25)
+MinimizeBtn.Font = Enum.Font.GothamBold
+MinimizeBtn.Text = "−"
+MinimizeBtn.TextColor3 = Config.Colors.Text
+MinimizeBtn.TextSize = 16
+MinimizeBtn.BorderSizePixel = 0
+MinimizeBtn.LayoutOrder = 1
+
+local MinimizeCorner = Instance.new("UICorner")
+MinimizeCorner.CornerRadius = UDim.new(0, 6)
+MinimizeCorner.Parent = MinimizeBtn
+
+-- Resize Button
+local ResizeBtn = Instance.new("TextButton")
+ResizeBtn.Parent = ControlsContainer
+ResizeBtn.BackgroundColor3 = Config.Colors.Primary
+ResizeBtn.Size = UDim2.new(0, 25, 0, 25)
+ResizeBtn.Font = Enum.Font.GothamBold
+ResizeBtn.Text = "↔"
+ResizeBtn.TextColor3 = Config.Colors.Text
+ResizeBtn.TextSize = 16
+ResizeBtn.BorderSizePixel = 0
+ResizeBtn.LayoutOrder = 2
+
+local ResizeCorner = Instance.new("UICorner")
+ResizeCorner.CornerRadius = UDim.new(0, 6)
+ResizeCorner.Parent = ResizeBtn
+
+-- Close Button
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Parent = ControlsContainer
+CloseBtn.BackgroundColor3 = Config.Colors.Danger
+CloseBtn.Size = UDim2.new(0, 25, 0, 25)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Text = "×"
+CloseBtn.TextColor3 = Config.Colors.Text
+CloseBtn.TextSize = 16
+CloseBtn.BorderSizePixel = 0
+CloseBtn.LayoutOrder = 3
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 6)
+CloseCorner.Parent = CloseBtn
+
+-- Enhanced Search Bar
+local SearchContainer = Instance.new("Frame")
+SearchContainer.Parent = MainContainer
+SearchContainer.BackgroundColor3 = Config.Colors.Surface
+SearchContainer.Size = UDim2.new(1, -20, 0, 35)
+SearchContainer.Position = UDim2.new(0, 10, 0, 55)
+SearchContainer.BorderSizePixel = 0
+
+local SearchCorner = Instance.new("UICorner")
+SearchCorner.CornerRadius = UDim.new(0, 8)
+SearchCorner.Parent = SearchContainer
+
+local SearchBox = Instance.new("TextBox")
+SearchBox.Parent = SearchContainer
+SearchBox.BackgroundTransparency = 1
+SearchBox.Size = UDim2.new(1, -40, 1, 0)
+SearchBox.Position = UDim2.new(0, 15, 0, 0)
+SearchBox.Font = Enum.Font.Gotham
+SearchBox.PlaceholderText = "🔍 Search scripts..."
+SearchBox.Text = ""
+SearchBox.TextColor3 = Config.Colors.Text
+SearchBox.PlaceholderColor3 = Config.Colors.TextDim
+SearchBox.TextSize = 12
+SearchBox.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Content Area
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Parent = MainContainer
+ContentFrame.BackgroundTransparency = 1
+ContentFrame.Size = UDim2.new(1, 0, 1, -100)
+ContentFrame.Position = UDim2.new(0, 0, 0, 100)
+
+-- Sidebar
+local Sidebar = Instance.new("Frame")
+Sidebar.Parent = ContentFrame
+Sidebar.BackgroundColor3 = Config.Colors.Surface
+Sidebar.Size = UDim2.new(0, 90, 1, -10)
+Sidebar.Position = UDim2.new(0, 10, 0, 0)
+Sidebar.BorderSizePixel = 0
+
+local SidebarCorner = Instance.new("UICorner")
+SidebarCorner.CornerRadius = UDim.new(0, 8)
+SidebarCorner.Parent = Sidebar
+
+local TabList = Instance.new("ScrollingFrame")
+TabList.Parent = Sidebar
+TabList.BackgroundTransparency = 1
+TabList.Size = UDim2.new(1, -10, 1, -10)
+TabList.Position = UDim2.new(0, 5, 0, 5)
+TabList.ScrollBarThickness = 2
+TabList.ScrollBarImageColor3 = Config.Colors.Primary
+TabList.BorderSizePixel = 0
+TabList.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+local TabLayout = Instance.new("UIListLayout")
+TabLayout.Parent = TabList
+TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+TabLayout.Padding = UDim.new(0, 5)
+
+-- Main Content
+local MainContent = Instance.new("Frame")
+MainContent.Parent = ContentFrame
+MainContent.BackgroundColor3 = Config.Colors.Surface
+MainContent.Size = UDim2.new(1, -110, 1, -10)
+MainContent.Position = UDim2.new(0, 105, 0, 0)
+MainContent.BorderSizePixel = 0
+
+local ContentCorner = Instance.new("UICorner")
+ContentCorner.CornerRadius = UDim.new(0, 8)
+ContentCorner.Parent = MainContent
+
+-- Welcome Tab Content (now a ScrollingFrame)
+local WelcomeContent = Instance.new("ScrollingFrame")
+WelcomeContent.Parent = MainContent
+WelcomeContent.BackgroundTransparency = 1
+WelcomeContent.Size = UDim2.new(1, -10, 1, -10)
+WelcomeContent.Position = UDim2.new(0, 5, 0, 5)
+WelcomeContent.ScrollBarThickness = 3
+WelcomeContent.ScrollBarImageColor3 = Config.Colors.Primary
+WelcomeContent.BorderSizePixel = 0
+WelcomeContent.CanvasSize = UDim2.new(0, 0, 0, 0)
+WelcomeContent.Visible = false
+
+local WelcomeLayout = Instance.new("UIListLayout")
+WelcomeLayout.Parent = WelcomeContent
+WelcomeLayout.SortOrder = Enum.SortOrder.LayoutOrder
+WelcomeLayout.Padding = UDim.new(0, 10)
+WelcomeLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+-- Script Grid for other tabs
+local ScriptGrid = Instance.new("ScrollingFrame")
+ScriptGrid.Parent = MainContent
+ScriptGrid.BackgroundTransparency = 1
+ScriptGrid.Size = UDim2.new(1, -10, 1, -10)
+ScriptGrid.Position = UDim2.new(0, 5, 0, 5)
+ScriptGrid.ScrollBarThickness = 3
+ScriptGrid.ScrollBarImageColor3 = Config.Colors.Primary
+ScriptGrid.BorderSizePixel = 0
+ScriptGrid.CanvasSize = UDim2.new(0, 0, 0, 0)
+ScriptGrid.Visible = false
+
+local GridLayout = Instance.new("UIGridLayout")
+GridLayout.Parent = ScriptGrid
+GridLayout.CellSize = UDim2.new(0, 140, 0, 100)
+GridLayout.CellPadding = UDim2.new(0, 8, 0, 8)
+GridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- Script Detail View
+local DetailContent = Instance.new("ScrollingFrame")
+DetailContent.Parent = MainContainer
+DetailContent.BackgroundTransparency = 1
+DetailContent.Size = UDim2.new(1, -20, 1, -55)
+DetailContent.Position = UDim2.new(0, 10, 0, 55)
+DetailContent.ScrollBarThickness = 3
+DetailContent.ScrollBarImageColor3 = Config.Colors.Primary
+DetailContent.BorderSizePixel = 0
+DetailContent.Visible = false
+DetailContent.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+local DetailLayout = Instance.new("UIListLayout")
+DetailLayout.Parent = DetailContent
+DetailLayout.SortOrder = Enum.SortOrder.LayoutOrder
+DetailLayout.Padding = UDim.new(0, 10)
+DetailLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+local DetailImage = Instance.new("ImageLabel")
+DetailImage.Parent = DetailContent
+DetailImage.BackgroundColor3 = Config.Colors.Background
+DetailImage.Size = UDim2.new(1, 0, 0, 120)
+DetailImage.ScaleType = Enum.ScaleType.Crop
+DetailImage.BorderSizePixel = 0
+DetailImage.LayoutOrder = 1
+
+local DetailImageCorner = Instance.new("UICorner")
+DetailImageCorner.CornerRadius = UDim.new(0, 8)
+DetailImageCorner.Parent = DetailImage
+
+local DetailName = Instance.new("TextLabel")
+DetailName.Parent = DetailContent
+DetailName.BackgroundTransparency = 1
+DetailName.Size = UDim2.new(1, 0, 0, 25)
+DetailName.Font = Enum.Font.GothamBold
+DetailName.Text = "Script Name"
+DetailName.TextColor3 = Config.Colors.Text
+DetailName.TextSize = 16
+DetailName.TextXAlignment = Enum.TextXAlignment.Left
+DetailName.LayoutOrder = 2
+
+local DetailGame = Instance.new("TextLabel")
+DetailGame.Parent = DetailContent
+DetailGame.BackgroundTransparency = 1
+DetailGame.Size = UDim2.new(1, 0, 0, 20)
+DetailGame.Font = Enum.Font.Gotham
+DetailGame.Text = "Game: Universal"
+DetailGame.TextColor3 = Config.Colors.TextDim
+DetailGame.TextSize = 12
+DetailGame.TextXAlignment = Enum.TextXAlignment.Left
+DetailGame.LayoutOrder = 3
+
+local DetailFeatures = Instance.new("TextLabel")
+DetailFeatures.Parent = DetailContent
+DetailFeatures.BackgroundTransparency = 1
+DetailFeatures.Size = UDim2.new(1, 0, 0, 15)
+DetailFeatures.Font = Enum.Font.GothamBold
+DetailFeatures.Text = "Features:"
+DetailFeatures.TextColor3 = Config.Colors.Text
+DetailFeatures.TextSize = 12
+DetailFeatures.TextXAlignment = Enum.TextXAlignment.Left
+DetailFeatures.LayoutOrder = 4
+
+local DetailFeaturesText = Instance.new("TextLabel")
+DetailFeaturesText.Parent = DetailContent
+DetailFeaturesText.BackgroundTransparency = 1
+DetailFeaturesText.Size = UDim2.new(1, 0, 0, 60)
+DetailFeaturesText.Font = Enum.Font.Gotham
+DetailFeaturesText.Text = "• Enhanced functionality\n• Safe execution\n• Easy to use"
+DetailFeaturesText.TextColor3 = Config.Colors.TextDim
+DetailFeaturesText.TextSize = 10
+DetailFeaturesText.TextXAlignment = Enum.TextXAlignment.Left
+DetailFeaturesText.TextYAlignment = Enum.TextYAlignment.Top
+DetailFeaturesText.TextWrapped = true
+DetailFeaturesText.LayoutOrder = 5
+
+local DetailButtonsContainer = Instance.new("Frame")
+DetailButtonsContainer.Parent = DetailContent
+DetailButtonsContainer.BackgroundTransparency = 1
+DetailButtonsContainer.Size = UDim2.new(1, 0, 0, 35)
+DetailButtonsContainer.LayoutOrder = 6
+
+local DetailButtonsLayout = Instance.new("UIListLayout")
+DetailButtonsLayout.Parent = DetailButtonsContainer
+DetailButtonsLayout.FillDirection = Enum.FillDirection.Horizontal
+DetailButtonsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+DetailButtonsLayout.Padding = UDim.new(0, 10)
+DetailButtonsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+local DetailRunBtn = Instance.new("TextButton")
+DetailRunBtn.Parent = DetailButtonsContainer
+DetailRunBtn.BackgroundColor3 = Config.Colors.Success
+DetailRunBtn.Size = UDim2.new(0, 80, 0, 35)
+DetailRunBtn.Font = Enum.Font.GothamBold
+DetailRunBtn.Text = "RUN"
+DetailRunBtn.TextColor3 = Config.Colors.Text
+DetailRunBtn.TextSize = 12
+DetailRunBtn.BorderSizePixel = 0
+DetailRunBtn.LayoutOrder = 1
+
+local DetailRunCorner = Instance.new("UICorner")
+DetailRunCorner.CornerRadius = UDim.new(0, 8)
+DetailRunCorner.Parent = DetailRunBtn
+
+local DetailCopyBtn = Instance.new("TextButton")
+DetailCopyBtn.Parent = DetailButtonsContainer
+DetailCopyBtn.BackgroundColor3 = Config.Colors.Secondary
+DetailCopyBtn.Size = UDim2.new(0, 80, 0, 35)
+DetailCopyBtn.Font = Enum.Font.GothamBold
+DetailCopyBtn.Text = "COPY"
+DetailCopyBtn.TextColor3 = Config.Colors.Text
+DetailCopyBtn.TextSize = 12
+DetailCopyBtn.BorderSizePixel = 0
+DetailCopyBtn.LayoutOrder = 2
+
+local DetailCopyCorner = Instance.new("UICorner")
+DetailCopyCorner.CornerRadius = UDim.new(0, 8)
+DetailCopyCorner.Parent = DetailCopyBtn
+
+-- Update CanvasSize for DetailContent
+local function UpdateDetailCanvas()
+    DetailContent.CanvasSize = UDim2.new(0, 0, 0, DetailLayout.AbsoluteContentSize.Y + 20)
+end
+
+DetailLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(UpdateDetailCanvas)
+
+-- Update CanvasSize for WelcomeContent
+local function UpdateWelcomeCanvas()
+    WelcomeContent.CanvasSize = UDim2.new(0, 0, 0, WelcomeLayout.AbsoluteContentSize.Y + 20)
+end
+
+WelcomeLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(UpdateWelcomeCanvas)
+
+-- Get greeting based on time
+function GetGreeting()
+    local hour = tonumber(os.date("%H"))
+    if hour < 12 then return "Good Morning!"
+    elseif hour < 18 then return "Good Afternoon!"
+    else return "Good Evening!" end
+end
+
+-- Create Welcome Tab Elements
+local GreetingLabel = Instance.new("TextLabel")
+GreetingLabel.Parent = WelcomeContent
+GreetingLabel.BackgroundTransparency = 1
+GreetingLabel.Size = UDim2.new(1, 0, 0, 25)
+GreetingLabel.Font = Enum.Font.GothamBold
+GreetingLabel.Text = GetGreeting()
+GreetingLabel.TextColor3 = Config.Colors.Text
+GreetingLabel.TextSize = 16
+GreetingLabel.TextXAlignment = Enum.TextXAlignment.Center
+GreetingLabel.LayoutOrder = 1
+
+local WelcomeMessage = Instance.new("TextLabel")
+WelcomeMessage.Parent = WelcomeContent
+WelcomeMessage.BackgroundTransparency = 1
+WelcomeMessage.Size = UDim2.new(1, 0, 0, 20)
+WelcomeMessage.Font = Enum.Font.Gotham
+WelcomeMessage.Text = "Welcome to Script Hub"
+WelcomeMessage.TextColor3 = Config.Colors.TextDim
+WelcomeMessage.TextSize = 11
+WelcomeMessage.TextXAlignment = Enum.TextXAlignment.Center
+WelcomeMessage.LayoutOrder = 2
+
+local FeaturesLabel = Instance.new("TextLabel")
+FeaturesLabel.Parent = WelcomeContent
+FeaturesLabel.BackgroundTransparency = 1
+FeaturesLabel.Size = UDim2.new(1, 0, 0, 20)
+FeaturesLabel.Font = Enum.Font.GothamBold
+FeaturesLabel.Text = "Features:"
+FeaturesLabel.TextColor3 = Config.Colors.Text
+FeaturesLabel.TextSize = 12
+FeaturesLabel.TextXAlignment = Enum.TextXAlignment.Center
+FeaturesLabel.LayoutOrder = 3
+
+local FeaturesText = Instance.new("TextLabel")
+FeaturesText.Parent = WelcomeContent
+FeaturesText.BackgroundTransparency = 1
+FeaturesText.Size = UDim2.new(1, 0, 0, 140)
+FeaturesText.Font = Enum.Font.Gotham
+FeaturesText.Text = "* Fast Script Execution: Run scripts instantly with minimal delay\n* Premium Scripts Available: Access exclusive scripts for enhanced gameplay\n* Regular Updates: Stay up-to-date with the latest features and fixes\n* Safe & Secure: Built-in protections to ensure safe script execution\n* User-Friendly Interface: Navigate easily with a sleek, modern design\n* Customizable Options: Tailor the hub to your preferences\n* Community Support: Join our active community for tips and updates"
+FeaturesText.TextColor3 = Config.Colors.TextDim
+FeaturesText.TextSize = 9
+FeaturesText.TextXAlignment = Enum.TextXAlignment.Center
+FeaturesText.TextYAlignment = Enum.TextYAlignment.Top
+FeaturesText.TextWrapped = true
+FeaturesText.LayoutOrder = 4
+
+local CustomTextLabel = Instance.new("TextLabel")
+CustomTextLabel.Parent = WelcomeContent
+CustomTextLabel.BackgroundTransparency = 1
+CustomTextLabel.Size = UDim2.new(1, 0, 0, 20)
+CustomTextLabel.Font = Enum.Font.GothamBlack
+CustomTextLabel.Text = "Click On the image to see full details"
+CustomTextLabel.TextColor3 = Config.Colors.Text
+CustomTextLabel.TextSize = 16
+CustomTextLabel.TextXAlignment = Enum.TextXAlignment.Center
+CustomTextLabel.TextYAlignment = Enum.TextYAlignment.Center
+CustomTextLabel.LayoutOrder = 5
+
+local AddScriptBtn = Instance.new("TextButton")
+AddScriptBtn.Parent = WelcomeContent
+AddScriptBtn.BackgroundColor3 = Config.Colors.Primary
+AddScriptBtn.Size = UDim2.new(0, 110, 0, 30)
+AddScriptBtn.Font = Enum.Font.GothamBold
+AddScriptBtn.Text = "ADD SCRIPT"
+AddScriptBtn.TextColor3 = Config.Colors.Text
+AddScriptBtn.TextSize = 11
+AddScriptBtn.BorderSizePixel = 0
+AddScriptBtn.LayoutOrder = 6
+
+local AddCorner = Instance.new("UICorner")
+AddCorner.CornerRadius = UDim.new(0, 8)
+AddCorner.Parent = AddScriptBtn
+
+local DiscordBtn = Instance.new("TextButton")
+DiscordBtn.Parent = WelcomeContent
+DiscordBtn.BackgroundColor3 = Config.Colors.Secondary
+DiscordBtn.Size = UDim2.new(0, 110, 0, 30)
+DiscordBtn.Font = Enum.Font.GothamBold
+DiscordBtn.Text = "DISCORD"
+DiscordBtn.TextColor3 = Config.Colors.Text
+DiscordBtn.TextSize = 11
+DiscordBtn.BorderSizePixel = 0
+DiscordBtn.LayoutOrder = 7
+
+local DiscordCorner = Instance.new("UICorner")
+DiscordCorner.CornerRadius = UDim.new(0, 8)
+DiscordCorner.Parent = DiscordBtn
+
+-- Show Detail View Function
+function Library:ShowDetailView(scriptData)
+    Library.DetailView = true
+    Library.CurrentScript = scriptData
+    
+    WelcomeContent.Visible = false
+    ScriptGrid.Visible = false
+    ContentFrame.Visible = false
+    SearchContainer.Visible = false
+    
+    DetailContent.Visible = true
+    BackBtn.Visible = true
+    
+    DetailImage.Image = scriptData.Image or "rbxassetid://15082265271"
+    DetailName.Text = scriptData.Name
+    DetailGame.Text = "Game: " .. (scriptData.Game or "Universal")
+    DetailFeaturesText.Text = scriptData.Features or "• Enhanced functionality\n• Safe execution\n• Easy to use"
+    
+    TitleLabel.Position = UDim2.new(0, 50, 0, 0)
+    
+    UpdateDetailCanvas()
+end
+
+-- Hide Detail View Function
+function Library:HideDetailView()
+    Library.DetailView = false
+    Library.CurrentScript = nil
+    
+    DetailContent.Visible = false
+    BackBtn.Visible = false
+    ContentFrame.Visible = true
+    SearchContainer.Visible = true
+    
+    TitleLabel.Position = UDim2.new(0, 15, 0, 0)
+    
+    if Library.CurrentTab then
+        if Library.CurrentTab.IsWelcome then
+            WelcomeContent.Visible = true
+            ScriptGrid.Visible = false
+        else
+            WelcomeContent.Visible = false
+            ScriptGrid.Visible = true
+            Library:UpdateDisplay()
+        end
+    end
+end
+
+-- Back Button Click Event
+BackBtn.MouseButton1Click:Connect(function()
+    Library:HideDetailView()
+end)
+
+-- Detail Button Events
+DetailRunBtn.MouseButton1Click:Connect(function()
+    if Library.CurrentScript and Library.CurrentScript.Script then
+        pcall(function() 
+            loadstring(Library.CurrentScript.Script)() 
+        end)
+    end
+end)
+
+DetailCopyBtn.MouseButton1Click:Connect(function()
+    if Library.CurrentScript and Library.CurrentScript.Script then
+        setclipboard(Library.CurrentScript.Script)
+    end
+end)
+
+-- Create Tab Function
+function Library:CreateTab(name, showInSidebar)
+    local Tab = {
+        Name = name, 
+        Items = {}, 
+        ShowInSidebar = showInSidebar ~= false,
+        IsWelcome = name == "HOME"
+    }
+    
+    if Tab.ShowInSidebar then
+        local TabBtn = Instance.new("TextButton")
+        TabBtn.Parent = TabList
+        TabBtn.BackgroundColor3 = Config.Colors.Background
+        TabBtn.Size = UDim2.new(1, 0, 0, 30)
+        TabBtn.Font = Enum.Font.Gotham
+        TabBtn.Text = name
+        TabBtn.TextColor3 = Config.Colors.TextDim
+        TabBtn.TextSize = 10
+        TabBtn.BorderSizePixel = 0
+        TabBtn.LayoutOrder = #Library.Tabs + 1
+        
+        local TabCorner = Instance.new("UICorner")
+        TabCorner.CornerRadius = UDim.new(0, 6)
+        TabCorner.Parent = TabBtn
+        
+        TabBtn.MouseButton1Click:Connect(function()
+            if not Library.DetailView then
+                Library:SelectTab(Tab)
+            end
+        end)
+        
+        Tab.Button = TabBtn
+    end
+    
+    table.insert(Library.Tabs, Tab)
+    if #Library.Tabs == 1 and Tab.ShowInSidebar then
+        Library:SelectTab(Tab)
+    end
+    
+    spawn(function()
+        wait()
+        TabList.CanvasSize = UDim2.new(0, 0, 0, TabLayout.AbsoluteContentSize.Y)
+    end)
+    
+    return Tab
+end
+
+function Library:SelectTab(tab)
+    if Library.CurrentTab and Library.CurrentTab.Button then
+        Library.CurrentTab.Button.BackgroundColor3 = Config.Colors.Background
+        Library.CurrentTab.Button.TextColor3 = Config.Colors.TextDim
+    end
+    
+    Library.CurrentTab = tab
+    if tab.Button then
+        tab.Button.BackgroundColor3 = Config.Colors.Primary
+        tab.Button.TextColor3 = Config.Colors.Text
+    end
+    
+    if tab.IsWelcome then
+        WelcomeContent.Visible = true
+        ScriptGrid.Visible = false
+    else
+        WelcomeContent.Visible = false
+        ScriptGrid.Visible = true
+        Library:UpdateDisplay()
+    end
+end
+
+function Library:UpdateDisplay()
+    for _, child in pairs(ScriptGrid:GetChildren()) do
+        if child:IsA("Frame") then child:Destroy() end
+    end
+    
+    local items = {}
+    if SearchBox.Text ~= "" then
+        for _, item in pairs(Library.AllItems) do
+            if string.find(string.lower(item.Name), string.lower(SearchBox.Text)) then
+                table.insert(items, item)
+            end
+        end
+    elseif Library.CurrentTab and not Library.CurrentTab.IsWelcome then
+        items = Library.CurrentTab.Items
+    end
+    
+    for i, item in pairs(items) do
+        Library:CreateScriptCard(item, i)
+    end
+    
+    spawn(function()
+        wait(0.1)
+        ScriptGrid.CanvasSize = UDim2.new(0, 0, 0, GridLayout.AbsoluteContentSize.Y + 10)
+    end)
+end
+
+function Library:CreateScriptCard(data, order)
+    local Card = Instance.new("Frame")
+    Card.Parent = ScriptGrid
+    Card.BackgroundColor3 = Config.Colors.Background
+    Card.Size = UDim2.new(0, 140, 0, 100)
+    Card.BorderSizePixel = 0
+    Card.LayoutOrder = order
+    
+    local CardCorner = Instance.new("UICorner")
+    CardCorner.CornerRadius = UDim.new(0, 8)
+    CardCorner.Parent = Card
+    
+    local CardBtn = Instance.new("TextButton")
+    CardBtn.Parent = Card
+    CardBtn.BackgroundTransparency = 1
+    CardBtn.Size = UDim2.new(1, 0, 1, 0)
+    CardBtn.Text = ""
+    CardBtn.ZIndex = 10
+    
+    CardBtn.MouseButton1Click:Connect(function()
+        Library:ShowDetailView(data)
+    end)
+    
+    if data.Image then
+        local ImageFrame = Instance.new("ImageLabel")
+        ImageFrame.Parent = Card
+        ImageFrame.BackgroundTransparency = 1
+        ImageFrame.Size = UDim2.new(1, -10, 0, 50)
+        ImageFrame.Position = UDim2.new(0, 5, 0, 5)
+        ImageFrame.Image = data.Image
+        ImageFrame.ScaleType = Enum.ScaleType.Crop
+        ImageFrame.ZIndex = 1
+        
+        local ImageCorner = Instance.new("UICorner")
+        ImageCorner.CornerRadius = UDim.new(0, 6)
+        ImageCorner.Parent = ImageFrame
+    end
+    
+    local NameLabel = Instance.new("TextLabel")
+    NameLabel.Parent = Card
+    NameLabel.BackgroundTransparency = 1
+    NameLabel.Size = UDim2.new(1, -10, 0, 15)
+    NameLabel.Position = UDim2.new(0, 5, 0, 60)
+    NameLabel.Font = Enum.Font.GothamBold
+    NameLabel.Text = data.Name
+    NameLabel.TextColor3 = Config.Colors.Text
+    NameLabel.TextSize = 11
+    NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+    NameLabel.ZIndex = 2
+    
+    local RunBtn = Instance.new("TextButton")
+    RunBtn.Parent = Card
+    RunBtn.BackgroundColor3 = Config.Colors.Success
+    RunBtn.Size = UDim2.new(0, 60, 0, 20)
+    RunBtn.Position = UDim2.new(0, 5, 1, -25)
+    RunBtn.Font = Enum.Font.GothamBold
+    RunBtn.Text = "RUN"
+    RunBtn.TextColor3 = Config.Colors.Text
+    RunBtn.TextSize = 9
+    RunBtn.BorderSizePixel = 0
+    RunBtn.ZIndex = 15
+    
+    local RunCorner = Instance.new("UICorner")
+    RunCorner.CornerRadius = UDim.new(0, 4)
+    RunCorner.Parent = RunBtn
+    
+    local CopyBtn = Instance.new("TextButton")
+    CopyBtn.Parent = Card
+    CopyBtn.BackgroundColor3 = Config.Colors.Secondary
+    CopyBtn.Size = UDim2.new(0, 60, 0, 20)
+    CopyBtn.Position = UDim2.new(1, -65, 1, -25)
+    CopyBtn.Font = Enum.Font.GothamBold
+    CopyBtn.Text = "COPY"
+    CopyBtn.TextColor3 = Config.Colors.Text
+    CopyBtn.TextSize = 9
+    CopyBtn.BorderSizePixel = 0
+    CopyBtn.ZIndex = 15
+    
+    local CopyCorner = Instance.new("UICorner")
+    CopyCorner.CornerRadius = UDim.new(0, 4)
+    CopyCorner.Parent = CopyBtn
+    
+    RunBtn.MouseButton1Click:Connect(function()
+        if data.Script then
+            pcall(function() loadstring(data.Script)() end)
+        end
+    end)
+    
+    CopyBtn.MouseButton1Click:Connect(function()
+        if data.Script then
+            setclipboard(data.Script)
+        end
+    end)
+end
+
+function Library:AddScript(tabName, data)
+    local tab = nil
+    for _, t in pairs(Library.Tabs) do
+        if t.Name == tabName then tab = t break end
+    end
+    if not tab then tab = Library:CreateTab(tabName, data.ShowInSidebar) end
+    
+    table.insert(tab.Items, data)
+    table.insert(Library.AllItems, data)
+    if Library.CurrentTab == tab and not tab.IsWelcome then 
+        Library:UpdateDisplay() 
+    end
+end
+
+-- Search functionality
+SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
+    if not Library.DetailView then
+        if SearchBox.Text ~= "" then
+            WelcomeContent.Visible = false
+            ScriptGrid.Visible = true
+            Library:UpdateDisplay()
+        elseif Library.CurrentTab then
+            if Library.CurrentTab.IsWelcome then
+                WelcomeContent.Visible = true
+                ScriptGrid.Visible = false
+            else
+                Library:UpdateDisplay()
+            end
+        end
+    end
+end)
+
+-- Minimize functionality (updated to notify toggle)
+MinimizeBtn.MouseButton1Click:Connect(function()
+    Library.Visible = not Library.Visible
+    MainContainer.Visible = Library.Visible
+    -- Notify toggle script
+    local toggleGui = PlayerGui:FindFirstChild("FryzerToggleGUI")
+    if toggleGui then
+        local toggleScript = toggleGui:FindFirstChild("ToggleScript")
+        if toggleScript then
+            local toggleModule = require(toggleScript)
+            if toggleModule.UpdateStatus then
+                toggleModule.UpdateStatus(Library.Visible)
+            end
+        end
+    end
+end)
+
+-- Resize functionality
+ResizeBtn.MouseButton1Click:Connect(function()
+    Library.IsLarge = not Library.IsLarge
+    local newSize = Library.IsLarge and UDim2.new(0, 600, 0, 450) or UDim2.new(0, 420, 0, 320)
+    local newPosition = Library.IsLarge and UDim2.new(0.5, -300, 0.5, -225) or UDim2.new(0.5, -210, 0.5, -160)
+    MainContainer:TweenSizeAndPosition(newSize, newPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+end)
+
+-- Close functionality (updated to destroy toggle)
+CloseBtn.MouseButton1Click:Connect(function()
+    local toggleGui = PlayerGui:FindFirstChild("FryzerToggleGUI")
+    if toggleGui then
+        toggleGui:Destroy()
+    end
+    ScreenGui:Destroy()
+end)
+
+-- Button functionality
+AddScriptBtn.MouseButton1Click:Connect(function()
+    setclipboard("https://website-flame-tau-62.vercel.app/")
+end)
+
+DiscordBtn.MouseButton1Click:Connect(function()
+    setclipboard("https://discord.com/invite/8THMQmXvuK")
+end)
+
+-- Tab Section
+local welcomeTab = Library:CreateTab("HOME", true)
+Library:CreateTab("UNIVERSAL", true)
+Library:CreateTab("GAMES", true)
+Library:CreateTab("EXPLOIT", false)
+
+Library:SelectTab(welcomeTab)
+
+-- Existing Scripts
+Library:AddScript("UNIVERSAL", {
+    Name = "Speed Boost",
+    Image = "rbxassetid://15082265271",
+    Game = "Universal",
+    Features = "• Increases walk speed to 100\n• Instant activation\n• Safe to use",
+    Script = [[
+        local player = game.Players.LocalPlayer
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.WalkSpeed = 100
+            print("Speed boosted to 100!")
+        end
+    ]]
+})
+
+Library:AddScript("UNIVERSAL", {
+    Name = "Jump Power",
+    Image = "rbxassetid://15082265271",
+    Game = "Universal",
+    Features = "• Increases jump height\n• Enhanced mobility\n• Works in all games",
+    Script = [[
+        local player = game.Players.LocalPlayer
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.JumpPower = 150
+            print("Jump power increased to 150!")
+        end
+    ]]
+})
+
+Library:AddScript("UNIVERSAL", {
+    Name = "Infinite Health",
+    Image = "rbxassetid://15082265271",
+    Game = "Universal", 
+    Features = "• Infinite health points\n• Never die from damage\n• Universal compatibility",
+    Script = [[
+        local player = game.Players.LocalPlayer
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.MaxHealth = math.huge
+            player.Character.Humanoid.Health = math.huge
+            print("Infinite health enabled!")
+        end
+    ]]
+})
+
+Library:AddScript("UNIVERSAL", {
+    Name = "God Mode",
+    Image = "rbxassetid://15082265271",
+    Game = "Universal",
+    Features = "• Complete invincibility\n• Auto health restoration\n• Permanent protection",
+    Script = [[
+        local player = game.Players.LocalPlayer
+        local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.MaxHealth = math.huge
+            humanoid.Health = math.huge
+            humanoid.Changed:Connect(function()
+                humanoid.Health = math.huge
+            end)
+            print("God mode activated!")
+        end
+    ]]
+})
+
+Library:AddScript("UNIVERSAL", {
+    Name = "Reset Character",
+    Image = "rbxassetid://15082265271",
+    Game = "Universal",
+    Features = "• Instant character reset\n• Quick respawn\n• Fixes stuck character",
+    Script = [[
+        local player = game.Players.LocalPlayer
+        if player.Character then
+            player.Character:BreakJoints()
+            print("Character reset!")
+        end
+    ]]
+})
+
+Library:AddScript("UNIVERSAL", {
+    Name = "No Clip",
+    Image = "rbxassetid://15082265271",
+    Game = "Universal",
+    Features = "• Walk through walls\n• Toggle with 'N' key\n• Bypass all barriers",
+    Script = [[
+        local player = game.Players.LocalPlayer
+        local noclip = false
+        local mouse = player:GetMouse()
+        
+        mouse.KeyDown:Connect(function(key)
+            if key:lower() == "n" then
+                noclip = not noclip
+                print("No clip " .. (noclip and "enabled" or "disabled") .. "!")
+            end
+        end)
+        
+        game:GetService("RunService").Stepped:Connect(function()
+            if noclip and player.Character then
+                for _, part in pairs(player.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end)
+    ]]
+})
+
+Library:AddScript("GAMES", {
+    Name = "Auto Farm",
+    Image = "rbxassetid://15082265271",
+    Game = "Multiple Games",
+    Features = "• Automatic farming\n• Continuous operation\n• Customizable settings",
+    Script = [[
+        local auto = true
+        spawn(function()
+            while auto do
+                wait(1)
+                print("Auto farming...")
+            end
+        end)
+    ]]
+})
+
+Library:AddScript("GAMES", {
+    Name = "Teleport GUI",
+    Image = "rbxassetid://15082265271",
+    Game = "Universal",
+    Features = "• Click to teleport\n• Instant movement\n• Mouse-based control",
+    Script = [[
+        local player = game.Players.LocalPlayer
+        local mouse = player:GetMouse()
+        
+        mouse.Button1Down:Connect(function()
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(mouse.Hit.Position)
+                print("Teleported to clicked position!")
+            end
+        end)
+    ]]
+})
+
+Library:AddScript("GAMES", {
+    Name = "ESP Players",
+    Image = "rbxassetid://15082265271",
+    Game = "Universal",
+    Features = "• See all players\n• Highlight through walls\n• Real-time tracking",
+    Script = [[
+        local function createESP(player)
+            if player.Character and player.Character:FindFirstChild("Head") then
+                local highlight = Instance.new("Highlight")
+                highlight.Parent = player.Character
+                highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+            end
+        end
+        
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                createESP(player)
+            end
+        end
+        
+        game.Players.PlayerAdded:Connect(createESP)
+        print("ESP enabled for all players!")
+    ]]
+})
+
+Library:AddScript("GAMES", {
+    Name = "Auto Clicker",
+    Image = "rbxassetid://15082265271",
+    Game = "Universal",
+    Features = "• Automatic clicking\n• Toggle with 'C' key\n• Fast click rate",
+    Script = [[
+        local player = game.Players.LocalPlayer
+        local mouse = player:GetMouse()
+        local clicking = false
+        
+        mouse.KeyDown:Connect(function(key)
+            if key:lower() == "c" then
+                clicking = not clicking
+                print("Auto clicker " .. (clicking and "enabled" or "disabled") .. "!")
+            end
+        end)
+        
+        spawn(function()
+            while true do
+                if clicking then
+                    mouse1click()
+                end
+                wait(0.1)
+            end
+        end)
+    ]]
+})
+
+Library:AddScript("GAMES", {
+    Name = "Kill Aura",
+    Image = "rbxassetid://15082265271",
+    Game = "PvP Games",
+    Features = "• Auto-attack nearby enemies\n• Toggle with 'K' key\n• 10 stud range",
+    Script = [[
+        local player = game.Players.LocalPlayer
+        local auraEnabled = false
+        
+        game:GetService("UserInputService").InputBegan:Connect(function(input)
+            if input.KeyCode == Enum.KeyCode.K then
+                auraEnabled = not auraEnabled
+                print("Kill aura " .. (auraEnabled and "enabled" or "disabled") .. "!")
+            end
+        end)
+        
+        game:GetService("RunService").Heartbeat:Connect(function()
+            if auraEnabled and player.Character then
+                for _, p in pairs(game.Players:GetPlayers()) do
+                    if p ~= player and p.Character and p.Character:FindFirstChild("Humanoid") then
+                        local distance = (p.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                        if distance < 10 then
+                            p.Character.Humanoid.Health = 0
+                        end
+                    end
+                end
+            end
+        end)
+    ]]
+})
+
+return {
+    ScreenGui = ScreenGui,
+    Library = Library
+}
