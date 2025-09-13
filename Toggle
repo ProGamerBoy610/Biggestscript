@@ -1,0 +1,376 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local GuiService = game:GetService("GuiService")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Modern Configuration
+local Config = {
+    Size = {
+        Width = 140,
+        Height = 40
+    },
+    Colors = {
+        Primary = Color3.fromRGB(45, 45, 55),
+        Secondary = Color3.fromRGB(35, 35, 45),
+        Accent = Color3.fromRGB(138, 43, 226),
+        Text = Color3.fromRGB(255, 255, 255),
+        TextSecondary = Color3.fromRGB(180, 180, 180),
+        Success = Color3.fromRGB(46, 204, 113),
+        Error = Color3.fromRGB(231, 76, 60),
+        Shadow = Color3.fromRGB(0, 0, 0),
+        Glass = Color3.fromRGB(255, 255, 255)
+    },
+    Position = {
+        X = 50,
+        Y = 150
+    },
+    Animations = {
+        Speed = 0.4,
+        EaseStyle = Enum.EasingStyle.Quart,
+        EaseDirection = Enum.EasingDirection.Out
+    }
+}
+
+-- Remove existing GUI
+if PlayerGui:FindFirstChild("FryzerToggleGUI") then
+    PlayerGui:FindFirstChild("FryzerToggleGUI"):Destroy()
+end
+
+-- Create Main ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "FryzerToggleGUI"
+ScreenGui.Parent = PlayerGui
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.DisplayOrder = 999
+
+-- Main Container
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Config.Colors.Primary
+MainFrame.BackgroundTransparency = 0.1
+MainFrame.BorderSizePixel = 0
+MainFrame.Position = UDim2.new(0, Config.Position.X, 0, Config.Position.Y)
+MainFrame.Size = UDim2.new(0, Config.Size.Width, 0, Config.Size.Height)
+MainFrame.ZIndex = 2
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 10)
+MainCorner.Parent = MainFrame
+
+local Stroke = Instance.new("UIStroke")
+Stroke.Color = Config.Colors.Glass
+Stroke.Transparency = 0.8
+Stroke.Thickness = 1
+Stroke.Parent = MainFrame
+
+local BlurFrame = Instance.new("Frame")
+BlurFrame.Name = "BlurFrame"
+BlurFrame.Parent = MainFrame
+BlurFrame.BackgroundColor3 = Config.Colors.Glass
+BlurFrame.BackgroundTransparency = 0.95
+BlurFrame.BorderSizePixel = 0
+BlurFrame.Size = UDim2.new(1, 0, 1, 0)
+BlurFrame.ZIndex = 1
+
+local BlurCorner = Instance.new("UICorner")
+BlurCorner.CornerRadius = UDim.new(0, 10)
+BlurCorner.Parent = BlurFrame
+
+local GradientFrame = Instance.new("Frame")
+GradientFrame.Name = "GradientFrame"
+GradientFrame.Parent = MainFrame
+GradientFrame.BackgroundTransparency = 0.7
+GradientFrame.BorderSizePixel = 0
+GradientFrame.Size = UDim2.new(1, 0, 1, 0)
+GradientFrame.ZIndex = 2
+
+local GradientCorner = Instance.new("UICorner")
+GradientCorner.CornerRadius = UDim.new(0, 10)
+GradientCorner.Parent = GradientFrame
+
+local Gradient = Instance.new("UIGradient")
+Gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Config.Colors.Primary),
+    ColorSequenceKeypoint.new(0.5, Config.Colors.Secondary),
+    ColorSequenceKeypoint.new(1.0, Config.Colors.Primary)
+}
+Gradient.Rotation = 45
+Gradient.Parent = GradientFrame
+
+local ShadowFrame = Instance.new("Frame")
+ShadowFrame.Name = "ShadowFrame"
+ShadowFrame.Parent = ScreenGui
+ShadowFrame.BackgroundColor3 = Config.Colors.Shadow
+ShadowFrame.BackgroundTransparency = 0.6
+ShadowFrame.BorderSizePixel = 0
+ShadowFrame.Position = UDim2.new(0, Config.Position.X + 4, 0, Config.Position.Y + 4)
+ShadowFrame.Size = UDim2.new(0, Config.Size.Width, 0, Config.Size.Height)
+ShadowFrame.ZIndex = 1
+
+local ShadowCorner = Instance.new("UICorner")
+ShadowCorner.CornerRadius = UDim.new(0, 10)
+ShadowCorner.Parent = ShadowFrame
+
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Name = "ToggleButton"
+ToggleButton.Parent = MainFrame
+ToggleButton.BackgroundTransparency = 1
+ToggleButton.Size = UDim2.new(1, 0, 1, 0)
+ToggleButton.Text = ""
+ToggleButton.ZIndex = 10
+
+local StatusDot = Instance.new("Frame")
+StatusDot.Name = "StatusDot"
+StatusDot.Parent = MainFrame
+StatusDot.BackgroundColor3 = Config.Colors.Error
+StatusDot.BorderSizePixel = 0
+StatusDot.Position = UDim2.new(0, 12, 0.5, -3)
+StatusDot.Size = UDim2.new(0, 6, 0, 6)
+StatusDot.ZIndex = 5
+
+local DotCorner = Instance.new("UICorner")
+DotCorner.CornerRadius = UDim.new(0.5, 0)
+DotCorner.Parent = StatusDot
+
+local DotGlow = Instance.new("Frame")
+DotGlow.Name = "DotGlow"
+DotGlow.Parent = MainFrame
+DotGlow.BackgroundColor3 = Config.Colors.Error
+DotGlow.BackgroundTransparency = 0.7
+DotGlow.BorderSizePixel = 0
+DotGlow.Position = UDim2.new(0, 10, 0.5, -5)
+DotGlow.Size = UDim2.new(0, 10, 0, 10)
+DotGlow.ZIndex = 4
+
+local GlowCorner = Instance.new("UICorner")
+GlowCorner.CornerRadius = UDim.new(0.5, 0)
+GlowCorner.Parent = DotGlow
+
+local MainLabel = Instance.new("TextLabel")
+MainLabel.Name = "MainLabel"
+MainLabel.Parent = MainFrame
+MainLabel.BackgroundTransparency = 1
+MainLabel.Position = UDim2.new(0, 28, 0, 5)
+MainLabel.Size = UDim2.new(1, -35, 0, 15)
+MainLabel.Font = Enum.Font.GothamMedium
+MainLabel.Text = "Tap To Open"
+MainLabel.TextColor3 = Config.Colors.Text
+MainLabel.TextSize = 12
+MainLabel.TextXAlignment = Enum.TextXAlignment.Left
+MainLabel.ZIndex = 6
+
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Name = "StatusLabel"
+StatusLabel.Parent = MainFrame
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Position = UDim2.new(0, 28, 0, 20)
+StatusLabel.Size = UDim2.new(1, -35, 0, 12)
+StatusLabel.Font = Enum.Font.Gotham
+StatusLabel.Text = ""
+StatusLabel.TextColor3 = Config.Colors.TextSecondary
+StatusLabel.TextSize = 9
+StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+StatusLabel.ZIndex = 6
+
+local PowerIcon = Instance.new("TextLabel")
+PowerIcon.Name = "PowerIcon"
+PowerIcon.Parent = MainFrame
+PowerIcon.BackgroundTransparency = 1
+PowerIcon.Position = UDim2.new(1, -25, 0.5, -8)
+PowerIcon.Size = UDim2.new(0, 16, 0, 16)
+PowerIcon.Font = Enum.Font.GothamBold
+PowerIcon.Text = "●"
+PowerIcon.TextColor3 = Config.Colors.TextSecondary
+PowerIcon.TextSize = 12
+PowerIcon.ZIndex = 6
+
+-- Variables
+local dragging = false
+local dragStart = nil
+local startPos = nil
+local isHubVisible = false
+
+local function CreateTween(object, properties, time)
+    time = time or Config.Animations.Speed
+    return TweenService:Create(object, 
+        TweenInfo.new(time, Config.Animations.EaseStyle, Config.Animations.EaseDirection), 
+        properties)
+end
+
+local function InputBegan(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        
+        CreateTween(MainFrame, {Size = UDim2.new(0, Config.Size.Width - 3, 0, Config.Size.Height - 2)}, 0.1):Play()
+        CreateTween(ShadowFrame, {BackgroundTransparency = 0.3}, 0.1):Play()
+    end
+end
+
+local function InputChanged(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        if dragging then
+            local delta = input.Position - dragStart
+            local newPosition = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            
+            local screenSize = workspace.CurrentCamera.ViewportSize
+            local x = math.clamp(newPosition.X.Offset, 0, screenSize.X - Config.Size.Width)
+            local y = math.clamp(newPosition.Y.Offset, GuiService:GetGuiInset().Y, screenSize.Y - Config.Size.Height)
+            
+            MainFrame.Position = UDim2.new(0, x, 0, y)
+            ShadowFrame.Position = UDim2.new(0, x + 4, 0, y + 4)
+        end
+    end
+end
+
+local function InputEnded(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+        
+        CreateTween(MainFrame, {Size = UDim2.new(0, Config.Size.Width, 0, Config.Size.Height)}, 0.2):Play()
+        CreateTween(ShadowFrame, {BackgroundTransparency = 0.6}, 0.2):Play()
+    end
+end
+
+ToggleButton.InputBegan:Connect(InputBegan)
+UserInputService.InputChanged:Connect(InputChanged)
+UserInputService.InputEnded:Connect(InputEnded)
+
+ToggleButton.MouseEnter:Connect(function()
+    if not dragging then
+        CreateTween(MainFrame, {BackgroundTransparency = 0.05}):Play()
+        CreateTween(Stroke, {Transparency = 0.6}):Play()
+        CreateTween(PowerIcon, {TextColor3 = Config.Colors.Accent}):Play()
+        CreateTween(ShadowFrame, {BackgroundTransparency = 0.4}):Play()
+    end
+end)
+
+ToggleButton.MouseLeave:Connect(function()
+    if not dragging then
+        CreateTween(MainFrame, {BackgroundTransparency = 0.1}):Play()
+        CreateTween(Stroke, {Transparency = 0.8}):Play()
+        CreateTween(PowerIcon, {TextColor3 = Config.Colors.TextSecondary}):Play()
+        CreateTween(ShadowFrame, {BackgroundTransparency = 0.6}):Play()
+    end
+end)
+
+local function UpdateStatus(connected)
+    isHubVisible = connected
+    -- No color or text changes, just update the internal state
+end
+
+local function ToggleModernHub()
+    local modernHubGui = PlayerGui:FindFirstChild("ModernScriptHub")
+    
+    if modernHubGui then
+        isHubVisible = not isHubVisible
+        modernHubGui.MainContainer.Visible = isHubVisible
+        
+        CreateTween(MainFrame, {Size = UDim2.new(0, Config.Size.Width - 5, 0, Config.Size.Height - 3)}, 0.1):Play()
+        wait(0.1)
+        CreateTween(MainFrame, {Size = UDim2.new(0, Config.Size.Width, 0, Config.Size.Height)}, 0.15):Play()
+        
+        local ripple = Instance.new("Frame")
+        ripple.Name = "Ripple"
+        ripple.Parent = MainFrame
+        ripple.BackgroundColor3 = Config.Colors.Accent
+        ripple.BackgroundTransparency = 0.5
+        ripple.BorderSizePixel = 0
+        ripple.Position = UDim2.new(0.5, -8, 0.5, -8)
+        ripple.Size = UDim2.new(0, 16, 0, 16)
+        ripple.ZIndex = 3
+        
+        local rippleCorner = Instance.new("UICorner")
+        rippleCorner.CornerRadius = UDim.new(0.5, 0)
+        rippleCorner.Parent = ripple
+        
+        CreateTween(ripple, {
+            Size = UDim2.new(0, Config.Size.Width * 1.5, 0, Config.Size.Width * 1.5),
+            Position = UDim2.new(0.5, -Config.Size.Width * 0.75, 0.5, -Config.Size.Width * 0.75),
+            BackgroundTransparency = 1
+        }, 0.4):Play()
+        
+        game:GetService("Debris"):AddItem(ripple, 0.4)
+        
+    else
+        CreateTween(MainFrame, {BackgroundColor3 = Config.Colors.Error}, 0.2):Play()
+        CreateTween(StatusLabel, {Text = "GUI Not Found"}, 0.1):Play()
+        CreateTween(StatusLabel, {TextColor3 = Color3.fromRGB(255, 200, 200)}, 0.2):Play()
+        
+        wait(1)
+        
+        CreateTween(MainFrame, {BackgroundColor3 = Config.Colors.Primary}, 0.3):Play()
+        CreateTween(StatusLabel, {Text = ""}, 0.1):Play()
+        UpdateStatus(false)
+        
+        print("ModernScriptHub not found! Make sure it exists in PlayerGui.")
+    end
+end
+
+ToggleButton.MouseButton1Click:Connect(function()
+    if not dragging then
+        ToggleModernHub()
+    end
+end)
+
+ToggleButton.TouchTap:Connect(function()
+    if not dragging then
+        ToggleModernHub()
+    end
+end)
+
+spawn(function()
+    while StatusDot.Parent do
+        CreateTween(DotGlow, {Size = UDim2.new(0, 12, 0, 12), BackgroundTransparency = 0.9}, 1):Play()
+        wait(1)
+        CreateTween(DotGlow, {Size = UDim2.new(0, 10, 0, 10), BackgroundTransparency = 0.7}, 1):Play()
+        wait(1)
+    end
+end)
+
+spawn(function()
+    wait(0.5)
+    local modernHubGui = PlayerGui:FindFirstChild("ModernScriptHub")
+    if modernHubGui then
+        isHubVisible = modernHubGui.MainContainer.Visible
+        UpdateStatus(isHubVisible)
+    else
+        UpdateStatus(false)
+    end
+end)
+
+local dragThreshold = 8
+local startDragPos = nil
+
+ToggleButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        startDragPos = input.Position
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if startDragPos and not dragging then
+            local currentPos = UserInputService:GetMouseLocation()
+            local distance = (currentPos - startDragPos).Magnitude
+            
+            if distance < dragThreshold then
+                ToggleModernHub()
+            end
+        end
+        startDragPos = nil
+    end
+end)
+
+return {
+    ScreenGui = ScreenGui,
+    ToggleFunction = ToggleModernHub,
+    UpdateStatus = UpdateStatus
+}
