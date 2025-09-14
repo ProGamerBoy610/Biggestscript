@@ -790,12 +790,12 @@ DiscordBtn.MouseButton1Click:Connect(function()
 end)
 
 -- Tabs and Scripts
-local welcomeTab = Library:CreateTab("HOME", true)
+local welcomeTab = Library:CreateTab("INFO", true)
 Library:SelectTab(welcomeTab)
 
 local scripts = {
     {
-        Tab = "HOME",
+        Tab = "INFO",
         Name = "Example Script",
         Image = "rbxassetid://15082265271",
         Game = "Universal",
