@@ -707,7 +707,7 @@ function Library:CreateScriptCard(data, order)
 
     if data.Image then
         -- Use auto-fit image function
-        local imageContainer, imageLabel = CreateAutoFitImage(Card, data.Image, UDim2.new(0, 5, 0, 5), UDim2.new(1, -10, 0, 50))
+        local imageLabel = CreateAutoFitImage(Card, data.Image, UDim2.new(0, 5, 0, 5), UDim2.new(1, -10, 0, 50))
     end
 
     local NameLabel = Instance.new("TextLabel", Card)
