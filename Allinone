@@ -269,7 +269,7 @@ ScriptGrid.BorderSizePixel = 0
 ScriptGrid.CanvasSize = UDim2.new(0, 0, 0, 0)
 ScriptGrid.Visible = false
 local GridLayout = Instance.new("UIGridLayout", ScriptGrid)
-GridLayout.CellSize = UDim2.new(0, 140, 0, 120) -- Updated to match card height
+GridLayout.CellSize = UDim2.new(0, 140, 0, 100)
 GridLayout.CellPadding = UDim2.new(0, 8, 0, 8)
 GridLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
@@ -289,24 +289,13 @@ DetailLayout.Padding = UDim.new(0, 10)
 DetailLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 print("Detail content created")
 
--- AUTO-FIT IMAGE CONTAINER FOR DETAIL VIEW
-local DetailImageContainer = Instance.new("Frame", DetailContent)
-DetailImageContainer.BackgroundTransparency = 1
-DetailImageContainer.Size = UDim2.new(1, 0, 0, 120)
-DetailImageContainer.LayoutOrder = 1
-
-local DetailImage = Instance.new("ImageLabel", DetailImageContainer)
+local DetailImage = Instance.new("ImageLabel", DetailContent)
 DetailImage.BackgroundColor3 = Config.Colors.Background
-DetailImage.Size = UDim2.new(1, 0, 1, 0)
-DetailImage.Position = UDim2.new(0, 0, 0, 0)
-DetailImage.ScaleType = Enum.ScaleType.Fit -- Changed to Fit for proper scaling
+DetailImage.Size = UDim2.new(1, 0, 0, 120)
+DetailImage.ScaleType = Enum.ScaleType.Crop
 DetailImage.BorderSizePixel = 0
+DetailImage.LayoutOrder = 1
 Instance.new("UICorner", DetailImage).CornerRadius = UDim.new(0, 8)
-
--- Add UIAspectRatioConstraint for consistent aspect ratio
-local DetailImageAspectRatio = Instance.new("UIAspectRatioConstraint", DetailImage)
-DetailImageAspectRatio.AspectRatio = 16/9 -- Default 16:9 ratio, will adjust dynamically
-DetailImageAspectRatio.AspectType = Enum.AspectType.FitWithinMaxSize
 
 local DetailName = Instance.new("TextLabel", DetailContent)
 DetailName.BackgroundTransparency = 1
@@ -653,43 +642,6 @@ function Library:UpdateDisplay()
     print("Updated display with " .. #items .. " items")
 end
 
--- AUTO-FIT IMAGE FUNCTION FOR SCRIPT CARDS
-local function CreateAutoFitImage(parent, imageId, position, size)
-    -- Create container for the image
-    local imageContainer = Instance.new("Frame", parent)
-    imageContainer.BackgroundTransparency = 1
-    imageContainer.Position = position
-    imageContainer.Size = size
-    imageContainer.ClipsDescendants = true
-    Instance.new("UICorner", imageContainer).CornerRadius = UDim.new(0, 6)
-    
-    -- Create the actual image
-    local imageLabel = Instance.new("ImageLabel", imageContainer)
-    imageLabel.BackgroundColor3 = Config.Colors.Background
-    imageLabel.BackgroundTransparency = 0.3
-    imageLabel.Size = UDim2.new(1, 0, 1, 0)
-    imageLabel.Position = UDim2.new(0, 0, 0, 0)
-    imageLabel.Image = imageId or ""
-    imageLabel.ScaleType = Enum.ScaleType.Fit
-    imageLabel.ZIndex = 1
-    Instance.new("UICorner", imageLabel).CornerRadius = UDim.new(0, 6)
-    
-    -- Add aspect ratio constraint for consistent display
-    local aspectRatio = Instance.new("UIAspectRatioConstraint", imageLabel)
-    aspectRatio.AspectRatio = 16/9
-    aspectRatio.AspectType = Enum.AspectType.FitWithinMaxSize
-    
-    -- If image fails to load, show placeholder
-    spawn(function()
-        wait(2)
-        if imageLabel.Image == "" or not imageLabel.IsLoaded then
-            imageLabel.Image = "rbxassetid://15082265271" -- Fallback image
-        end
-    end)
-    
-    return imageContainer, imageLabel
-end
-
 function Library:CreateScriptCard(data, order)
     local Card = Instance.new("Frame", ScriptGrid)
     Card.BackgroundColor3 = Config.Colors.Background
@@ -706,8 +658,14 @@ function Library:CreateScriptCard(data, order)
     CardBtn.MouseButton1Click:Connect(function() self:ShowDetailView(data) end)
 
     if data.Image then
-        -- Use auto-fit image function
-        local imageLabel = CreateAutoFitImage(Card, data.Image, UDim2.new(0, 5, 0, 5), UDim2.new(1, -10, 0, 50))
+        local ImageFrame = Instance.new("ImageLabel", Card)
+        ImageFrame.BackgroundTransparency = 1
+        ImageFrame.Size = UDim2.new(1, -10, 0, 50)
+        ImageFrame.Position = UDim2.new(0, 5, 0, 5)
+        ImageFrame.Image = data.Image
+        ImageFrame.ScaleType = Enum.ScaleType.Crop
+        ImageFrame.ZIndex = 1
+        Instance.new("UICorner", ImageFrame).CornerRadius = UDim.new(0, 6)
     end
 
     local NameLabel = Instance.new("TextLabel", Card)
