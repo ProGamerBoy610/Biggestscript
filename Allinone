@@ -585,7 +585,7 @@ function Library:HideDetailView()
 end
 
 function Library:CreateTab(name, showInSidebar)
-    local Tab = { Name = name, Items = {}, ShowInSidebar = showInSidebar ~= false, IsWelcome = name == "HOME" }
+    local Tab = { Name = name, Items = {}, ShowInSidebar = showInSidebar ~= false, IsWelcome = name == "INFO" }
     if Tab.ShowInSidebar then
         local TabBtn = Instance.new("TextButton", TabList)
         TabBtn.BackgroundColor3 = Config.Colors.Background
@@ -793,28 +793,10 @@ end)
 local welcomeTab = Library:CreateTab("INFO", true)
 Library:SelectTab(welcomeTab)
 
-local scripts = {
-    {
-        Tab = "INFO",
-        Name = "Example Script",
-        Image = "rbxassetid://15082265271",
-        Game = "Universal",
-        Features = "• Example functionality\n• Safe execution\n• Test script",
-        Script = [[
-            print("Example script executed!")
-        ]]
-    }
-}
-
-for _, s in ipairs(scripts) do
-    local success, err = pcall(function() Library:AddScript(s.Tab, s) end)
-    if not success then warn("Error adding script " .. s.Name .. ": " .. err) end
-end
-
 print("Script initialization complete")
 
 -- CRITICAL: Set global variable and return Library for loadstring compatibility
 _G.Library = Library
 
--- Return the Library object - THIS IS THE KEY LINE THAT WAS MISSING!
+-- Return the Library object
 return Library
