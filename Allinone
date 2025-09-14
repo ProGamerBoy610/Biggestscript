@@ -269,7 +269,7 @@ ScriptGrid.BorderSizePixel = 0
 ScriptGrid.CanvasSize = UDim2.new(0, 0, 0, 0)
 ScriptGrid.Visible = false
 local GridLayout = Instance.new("UIGridLayout", ScriptGrid)
-GridLayout.CellSize = UDim2.new(0, 140, 0, 100)
+GridLayout.CellSize = UDim2.new(0, 140, 0, 120) -- Updated to match card height
 GridLayout.CellPadding = UDim2.new(0, 8, 0, 8)
 GridLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
