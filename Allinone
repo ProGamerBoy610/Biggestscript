@@ -291,11 +291,13 @@ print("Detail content created")
 
 local DetailImage = Instance.new("ImageLabel", DetailContent)
 DetailImage.BackgroundColor3 = Config.Colors.Background
-DetailImage.Size = UDim2.new(1, 0, 0, 120)
+DetailImage.Size = UDim2.new(1, 0, 0, 180) -- Height set to maintain 16:9 ratio for width of ~400 (400 * 9/16 ≈ 180)
 DetailImage.ScaleType = Enum.ScaleType.Crop
 DetailImage.BorderSizePixel = 0
 DetailImage.LayoutOrder = 1
 Instance.new("UICorner", DetailImage).CornerRadius = UDim.new(0, 8)
+local DetailImageAspect = Instance.new("UIAspectRatioConstraint", DetailImage)
+DetailImageAspect.AspectRatio = 16 / 9
 
 local DetailName = Instance.new("TextLabel", DetailContent)
 DetailName.BackgroundTransparency = 1
@@ -660,12 +662,14 @@ function Library:CreateScriptCard(data, order)
     if data.Image then
         local ImageFrame = Instance.new("ImageLabel", Card)
         ImageFrame.BackgroundTransparency = 1
-        ImageFrame.Size = UDim2.new(1, -10, 0, 50)
+        ImageFrame.Size = UDim2.new(1, -10, 0, 56) -- Height set to maintain 16:9 ratio for width of ~130 (130 * 9/16 ≈ 56)
         ImageFrame.Position = UDim2.new(0, 5, 0, 5)
         ImageFrame.Image = data.Image
         ImageFrame.ScaleType = Enum.ScaleType.Crop
         ImageFrame.ZIndex = 1
         Instance.new("UICorner", ImageFrame).CornerRadius = UDim.new(0, 6)
+        local ImageAspect = Instance.new("UIAspectRatioConstraint", ImageFrame)
+        ImageAspect.AspectRatio = 16 / 9
     end
 
     local NameLabel = Instance.new("TextLabel", Card)
@@ -753,9 +757,9 @@ SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
             ScriptGrid.Visible = true
             Library:UpdateDisplay()
         elseif Library.CurrentTab then
-            WelcomeContent.Visible = Library.CurrentTab.IsWelcome
-            ScriptGrid.Visible = not Library.CurrentTab.IsWelcome
-            if not Library.CurrentTab.IsWelcome then Library:UpdateDisplay() end
+            WelcomeContent.Visible = self.CurrentTab.IsWelcome
+            ScriptGrid.Visible = not self.CurrentTab.IsWelcome
+            if not self.CurrentTab.IsWelcome then self:UpdateDisplay() end
         end
     end
 end)
